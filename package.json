@@ -1,0 +1,46 @@
+{
+  "name": "tts-studio",
+  "private": true,
+  "engines": {
+    "node": ">=18.17.1",
+    "pnpm": ">=8.10.0"
+  },
+  "packageManager": "pnpm@8.10.0",
+  "scripts": {
+    "build": "pnpm with-env turbo build",
+    "dev": "pnpm with-env turbo dev --concurrency 15",
+    "libs": "pnpm with-env turbo libs",
+    "clean": "git clean -xdf node_modules",
+    "clean:workspaces": "turbo clean",
+    "format": "turbo format --continue -- --cache --cache-location='node_modules/.cache/.prettiercache' --ignore-unknown  --ignore-path=../../.prettierignore",
+    "format:fix": "turbo format --continue -- --write --cache --cache-location='node_modules/.cache/.prettiercache' --ignore-unknown --ignore-path=../../.prettierignore",
+    "lint": "turbo lint --continue -- --cache --cache-location 'node_modules/.cache/.eslintcache' && manypkg check",
+    "lint:fix": "turbo lint --continue -- --fix --cache --cache-location 'node_modules/.cache/.eslintcache' && manypkg fix",
+    "lint:staged": "lint-staged",
+    "typecheck": "turbo typecheck",
+    "check:lint:staged": "manypkg check && eslint --max-warnings 0 --cache --cache-location 'node_modules/.cache/.eslintcache'",
+    "check:commit:msg:staged": "commitlint --extends '@azizonkg/commitlint-config' --edit \"$1\"",
+    "with-env": "dotenv -v FORCE_COLOR=1 -c $NODE_ENV --",
+    "prepare": "husky install"
+  },
+  "dependencies": {
+    "@azizonkg/commitlint-config": "^0.1.0",
+    "@azizonkg/eslint-config": "^0.1.0",
+    "@azizonkg/lintstaged-config": "^0.1.0",
+    "@azizonkg/prettier-config": "^0.1.0",
+    "@commitlint/cli": "^17.7.1",
+    "@manypkg/cli": "^0.21.0",
+    "@turbo/gen": "^1.10.14",
+    "dotenv-cli": "^7.3.0",
+    "eslint": "^8.49.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^14.0.1",
+    "prettier": "^3.0.3",
+    "turbo": "^1.10.14",
+    "typescript": "^5.2.2"
+  },
+  "prettier": "@azizonkg/prettier-config",
+  "lint-staged": {
+    "*": "pnpm check:lint:staged"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "name": "@azizonkg/lintstaged-config",
+  "private": true,
+  "version": "0.1.0",
+  "main": "index.mjs",
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "_lint": "eslint .",
+    "format": "prettier --check \"**/*.{mjs,ts,md,json}\"",
+    "_typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "eslint": "^8.49.0"
+  },
+  "devDependencies": {
+    "@azizonkg/eslint-config": "^0.1.0",
+    "@azizonkg/tsconfig": "^0.1.0",
+    "@types/eslint": "^8.44.2",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "eslintConfig": {
+    "root": true,
+    "extends": [
+      "@azizonkg/eslint-config/base"
+    ]
+  },
+  "prettier": "@azizonkg/prettier-config"
+}

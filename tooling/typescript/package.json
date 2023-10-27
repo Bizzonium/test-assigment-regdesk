@@ -1,0 +1,16 @@
+{
+  "name": "@azizonkg/tsconfig",
+  "private": true,
+  "version": "0.1.0",
+  "files": [
+    "base.json",
+    "lib.json",
+    "nestjs.json",
+    "nextjs.json",
+    "node16.json",
+    "react-library.json"
+  ],
+  "devDependencies": {
+    "prettier": "^3.0.3"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "apps: debug full stack",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "pnpm dev",
+      // "serverReadyAction": {
+      //   "pattern": "- Local:.+(https?://.+)",
+      //   "uriFormat": "%s",
+      //   "action": "debugWithChrome"
+      // },
+      "sourceMaps": true,
+      "skipFiles": ["<node_internals>/**"],
+      "env": {
+        "NODE_ENV": "development"
+      }
+    }
+  ],
+  "compounds": [
+    {
+      "name": "apps: debug all",
+      "configurations": ["apps: debug full stack"],
+      "stopAll": true
+    }
+  ]
+}

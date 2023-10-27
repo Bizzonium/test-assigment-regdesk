@@ -1,0 +1,43 @@
+{
+  "name": "@azizonkg/common",
+  "private": true,
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "tsup --watch",
+    "build": "tsup",
+    "clean": "rm -rf .turbo dist node_modules",
+    "lint": "eslint .",
+    "format": "prettier --check \"**/*.{mjs,ts,md,json}\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@azizonkg/eslint-config": "^0.1.0",
+    "@azizonkg/prettier-config": "^0.1.0",
+    "@azizonkg/tsconfig": "^0.1.0",
+    "@types/node": "18.17.1",
+    "eslint": "^8.49.0",
+    "prettier": "^3.0.3",
+    "tsup": "^7.2.0",
+    "typescript": "^5.2.2"
+  },
+  "eslintConfig": {
+    "root": true,
+    "extends": [
+      "@azizonkg/eslint-config/base"
+    ]
+  },
+  "prettier": "@azizonkg/prettier-config"
+}
