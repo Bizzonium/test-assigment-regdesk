@@ -5,6 +5,7 @@ import { SwaggerModule } from '@nestjs/swagger'
 import { generateOpenApi } from '@ts-rest/open-api'
 import helmet from 'helmet'
 
+import { contracts } from '@azizonkg/contracts'
 import { envGeneric as env } from '@azizonkg/env'
 
 import { AppModule } from './app.module'
@@ -22,6 +23,31 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, { logger })
 
   app.enableShutdownHooks()
+
+  const document = generateOpenApi(
+    contracts,
+    {
+      info: {
+        title: 'Backend API',
+        version: '1.0.0',
+      },
+      servers: [
+        {
+          url: `http://${env.BACKEND_BIND_HOST}:${env.BACKEND_BIND_PORT}`,
+          description: 'Development server',
+        },
+      ],
+      externalDocs: {
+        description: 'Swagger JSON Schema',
+        url: '/api-json',
+      },
+    },
+    {
+      setOperationId: true,
+    }
+  )
+
+  SwaggerModule.setup('api', app, document)
 
   app.use(helmet())
   if (isDev) {

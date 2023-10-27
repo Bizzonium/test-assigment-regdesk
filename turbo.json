@@ -44,7 +44,8 @@
     "libs": {
       "dependsOn": [
         "@azizonkg/common#build",
-        "@azizonkg/env#build"
+        "@azizonkg/env#build",
+        "@azizonkg/contracts#build"
       ],
       "outputs": ["dist/**"],
       "dotEnv": [
