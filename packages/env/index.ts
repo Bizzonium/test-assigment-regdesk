@@ -11,6 +11,8 @@ const serverEnvSchema = {
 
   BACKEND_BIND_HOST: z.string(),
   BACKEND_BIND_PORT: z.coerce.number().min(1).max(65535),
+
+  MONGODB_URI: z.string().url(),
 }
 
 /**
@@ -31,6 +33,8 @@ const runtimeEnv = {
 
   BACKEND_BIND_HOST: process.env.BACKEND_BIND_HOST,
   BACKEND_BIND_PORT: process.env.BACKEND_BIND_PORT,
+
+  MONGODB_URI: process.env.MONGODB_URI,
 }
 
 const isServer = typeof window === 'undefined'
