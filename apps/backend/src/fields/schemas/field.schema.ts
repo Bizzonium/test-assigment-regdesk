@@ -3,8 +3,7 @@ import type { HydratedDocument } from 'mongoose'
 import * as mongoose from 'mongoose'
 
 import { Document } from '../../documents/schemas/document.schema'
-import { FieldContainer } from './field-container.schema'
-import { FieldTextInput } from './field-text-input.schema'
+import { FieldType } from '../enums/field-type.enum'
 
 /**
  * Each field can be a text input or a container for even more fields.
@@ -24,7 +23,7 @@ export class Field {
 
   @Prop({
     type: String,
-    enum: [FieldContainer.name, FieldTextInput.name],
+    enum: [FieldType.CONTAINER, FieldType.TEXT],
     required: true,
   })
   type!: string

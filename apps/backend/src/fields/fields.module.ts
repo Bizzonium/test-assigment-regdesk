@@ -1,14 +1,9 @@
 import { Module } from '@nestjs/common'
 import { MongooseModule } from '@nestjs/mongoose'
 
-import {
-  FieldContainer,
-  FieldContainerSchema,
-} from './schemas/field-container.schema'
-import {
-  FieldTextInput,
-  FieldTextInputSchema,
-} from './schemas/field-text-input.schema'
+import { FieldType } from './enums/field-type.enum'
+import { FieldContainerSchema } from './schemas/field-container.schema'
+import { FieldTextInputSchema } from './schemas/field-text-input.schema'
 import { Field, FieldSchema } from './schemas/field.schema'
 
 @Module({
@@ -18,8 +13,8 @@ import { Field, FieldSchema } from './schemas/field.schema'
         name: Field.name,
         schema: FieldSchema,
         discriminators: [
-          { name: FieldTextInput.name, schema: FieldTextInputSchema },
-          { name: FieldContainer.name, schema: FieldContainerSchema },
+          { name: FieldType.TEXT, schema: FieldTextInputSchema },
+          { name: FieldType.CONTAINER, schema: FieldContainerSchema },
         ],
       },
     ]),
