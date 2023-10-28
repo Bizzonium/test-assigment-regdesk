@@ -1,6 +1,11 @@
 # Test Assigment
 
-## Terms
+<details>
+  <summary>Assigment Terms</summary>
+  
+![image](https://github.com/Bizzonium/test-assigment-regdesk/assets/8555356/d0261100-03b2-47fa-a4a4-3730e839092b)
+
+</details>
 
 ## TODO
 
