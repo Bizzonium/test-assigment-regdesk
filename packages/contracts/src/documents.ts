@@ -1,15 +1,34 @@
 import { initContract } from '@ts-rest/core'
-import type * as mongoose from 'mongoose'
+import * as mongoose from 'mongoose'
 import { z } from 'zod'
 
 const c = initContract()
 
-export const DocumentIdSchema = z.custom<mongoose.Types.ObjectId>()
+export const DocumentIdSchema = z.custom<mongoose.Types.ObjectId>((val) => {
+  return typeof val === 'string' ? mongoose.Types.ObjectId.isValid(val) : false
+})
 export type DocumentId = z.infer<typeof DocumentIdSchema>
 
 export const DocumentSchema = z.object({
+  id: DocumentIdSchema,
   name: z.string(),
+  // TODO: figure out types
+  // fields: z.array(FieldSchema).optional(),
+  fields: z.any(),
 })
+export type Document = z.infer<typeof DocumentSchema>
+
+export const CreateDocumentDtoSchema = DocumentSchema.omit({
+  id: true,
+  fields: true,
+})
+export type CreateDocumentDto = z.infer<typeof CreateDocumentDtoSchema>
+
+export const UpdateDocumentDtoSchema = DocumentSchema.omit({
+  id: true,
+  fields: true,
+})
+export type UpdateDocumentDto = z.infer<typeof UpdateDocumentDtoSchema>
 
 export const DocumentsContract = c.router({
   getDocuments: {
@@ -43,7 +62,7 @@ export const DocumentsContract = c.router({
         message: z.string(),
       }),
     },
-    body: null,
+    body: CreateDocumentDtoSchema,
     summary: 'Add a new document',
   },
   updateDocument: {
@@ -58,16 +77,14 @@ export const DocumentsContract = c.router({
     pathParams: z.object({
       documentId: DocumentIdSchema,
     }),
-    body: null,
+    body: UpdateDocumentDtoSchema,
     summary: 'Update an existing document',
   },
   removeDocument: {
     method: 'DELETE',
     path: '/documents/:documentId',
     responses: {
-      204: z.object({
-        message: z.string(),
-      }),
+      204: z.undefined(),
       404: z.object({
         message: z.string(),
       }),

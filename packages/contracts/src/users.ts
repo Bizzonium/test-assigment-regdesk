@@ -1,16 +1,28 @@
 import { initContract } from '@ts-rest/core'
-import type * as mongoose from 'mongoose'
+import * as mongoose from 'mongoose'
 import { z } from 'zod'
 
 const c = initContract()
 
-export const UserIdSchema = z.custom<mongoose.Types.ObjectId>()
+export const UserIdSchema = z.custom<mongoose.Types.ObjectId>((val) => {
+  return typeof val === 'string' ? mongoose.Types.ObjectId.isValid(val) : false
+})
 export type UserId = z.infer<typeof UserIdSchema>
 
+export const UsernameSchema = z.string()
+export type Username = z.infer<typeof UsernameSchema>
+
 export const UserSchema = z.object({
-  _id: UserIdSchema,
-  username: z.string(),
+  id: UserIdSchema,
+  username: UsernameSchema,
 })
+export type User = z.infer<typeof UserSchema>
+
+export const CreateUserDtoSchema = UserSchema.omit({ id: true })
+export type CreateUserDto = z.infer<typeof CreateUserDtoSchema>
+
+export const UpdateUserDtoSchema = UserSchema.omit({ id: true })
+export type UpdateUserDto = z.infer<typeof UpdateUserDtoSchema>
 
 export const UsersContract = c.router({
   getUsers: {
@@ -23,7 +35,7 @@ export const UsersContract = c.router({
   },
   getUser: {
     method: 'GET',
-    path: '/users/:userId',
+    path: '/users/:username',
     responses: {
       200: UserSchema,
       404: z.object({
@@ -31,7 +43,7 @@ export const UsersContract = c.router({
       }),
     },
     pathParams: z.object({
-      userId: UserIdSchema,
+      username: UsernameSchema,
     }),
     summary: 'Get a single user',
   },
@@ -44,12 +56,12 @@ export const UsersContract = c.router({
         message: z.string(),
       }),
     },
-    body: null,
+    body: CreateUserDtoSchema,
     summary: 'Add a new user',
   },
   updateUser: {
     method: 'PUT',
-    path: '/users/:userId',
+    path: '/users/:username',
     responses: {
       200: UserSchema,
       404: z.object({
@@ -57,24 +69,22 @@ export const UsersContract = c.router({
       }),
     },
     pathParams: z.object({
-      userId: UserIdSchema,
+      username: UsernameSchema,
     }),
-    body: null,
+    body: UpdateUserDtoSchema,
     summary: 'Update an existing user',
   },
   removeUser: {
     method: 'DELETE',
-    path: '/users/:userId',
+    path: '/users/:username',
     responses: {
-      204: z.object({
-        message: z.string(),
-      }),
+      204: z.undefined(),
       404: z.object({
         message: z.string(),
       }),
     },
     pathParams: z.object({
-      userId: UserIdSchema,
+      username: UsernameSchema,
     }),
     body: null,
     summary: 'Remove an existing user',

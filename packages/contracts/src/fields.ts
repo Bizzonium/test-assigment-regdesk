@@ -1,17 +1,20 @@
 import { initContract } from '@ts-rest/core'
-import type * as mongoose from 'mongoose'
+import * as mongoose from 'mongoose'
 import { z } from 'zod'
 
 import { DocumentIdSchema } from './documents'
+import { UserIdSchema } from './users'
 
 const c = initContract()
 
-export const FieldIdSchema = z.custom<mongoose.Types.ObjectId>()
+export const FieldIdSchema = z.custom<mongoose.Types.ObjectId>((val) => {
+  return typeof val === 'string' ? mongoose.Types.ObjectId.isValid(val) : false
+})
 export type FieldId = z.infer<typeof FieldIdSchema>
 
 export const FieldBaseSchema = z.object({
+  id: FieldIdSchema,
   name: z.string(),
-  type: z.enum(['text', 'container']),
   document: DocumentIdSchema,
   parent: FieldIdSchema.optional(),
 })
@@ -23,17 +26,40 @@ export const FieldTextInputSchema = z.object({
 
 export const FieldContainerSchema = z.object({
   type: z.literal('container'),
+  permissions: z
+    .object({
+      user: UserIdSchema,
+      permission: z.enum(['none', 'view', 'edit']),
+    })
+    .array()
+    .optional(),
+  // TODO: recursive type
+  fields: z.any().optional(),
 })
 
-// export const FieldSchema = z.union([
-//   FieldBaseSchema,
-//   z.discriminatedUnion('type', [FieldTextInputSchema, FieldContainerSchema]),
-// ])
-export const FieldSchema = z.union([
-  FieldBaseSchema,
-  z.discriminatedUnion('type', [FieldTextInputSchema, FieldContainerSchema]),
+export const FieldSchema = z.discriminatedUnion('type', [
+  FieldBaseSchema.merge(FieldTextInputSchema),
+  FieldBaseSchema.merge(FieldContainerSchema),
 ])
 export type Field = z.infer<typeof FieldSchema>
+
+export const CreateFieldDtoSchema = z.discriminatedUnion('type', [
+  FieldBaseSchema.omit({ id: true }).merge(FieldTextInputSchema),
+  FieldBaseSchema.omit({ id: true }).merge(
+    FieldContainerSchema.omit({ fields: true })
+  ),
+])
+export type CreateFieldDto = z.infer<typeof CreateFieldDtoSchema>
+
+export const UpdateFieldDtoSchema = z.discriminatedUnion('type', [
+  FieldBaseSchema.omit({ id: true, parent: true, document: true }).merge(
+    FieldTextInputSchema
+  ),
+  FieldBaseSchema.omit({ id: true, parent: true, document: true }).merge(
+    FieldContainerSchema.omit({ fields: true })
+  ),
+])
+export type UpdateFieldDto = z.infer<typeof UpdateFieldDtoSchema>
 
 // TODO: database models should be moved from app to separate package to be used by both app and contracts
 
@@ -42,7 +68,9 @@ export const FieldsContract = c.router({
     method: 'GET',
     path: '/fields',
     responses: {
-      200: z.array(FieldSchema),
+      // TODO: figure out types
+      // 200: z.array(FieldSchema),
+      200: z.any(),
     },
     summary: 'Get the collection of fields',
   },
@@ -50,7 +78,9 @@ export const FieldsContract = c.router({
     method: 'GET',
     path: '/fields/:fieldId',
     responses: {
-      200: FieldSchema,
+      // TODO: figure out types
+      // 200: FieldSchema,
+      200: z.any(),
       404: z.object({
         message: z.string(),
       }),
@@ -64,19 +94,23 @@ export const FieldsContract = c.router({
     method: 'POST',
     path: '/fields',
     responses: {
-      200: FieldSchema,
+      // TODO: figure out types
+      // 200: FieldSchema,
+      200: z.any(),
       400: z.object({
         message: z.string(),
       }),
     },
-    body: null,
+    body: CreateFieldDtoSchema,
     summary: 'Add a new field',
   },
   updateField: {
     method: 'PUT',
     path: '/fields/:fieldId',
     responses: {
-      200: FieldSchema,
+      // TODO: figure out types
+      // 200: FieldSchema,
+      200: z.any(),
       404: z.object({
         message: z.string(),
       }),
@@ -84,16 +118,14 @@ export const FieldsContract = c.router({
     pathParams: z.object({
       fieldId: FieldIdSchema,
     }),
-    body: null,
+    body: UpdateFieldDtoSchema,
     summary: 'Update an existing field',
   },
   removeField: {
     method: 'DELETE',
     path: '/fields/:fieldId',
     responses: {
-      204: z.object({
-        message: z.string(),
-      }),
+      204: z.undefined(),
       404: z.object({
         message: z.string(),
       }),

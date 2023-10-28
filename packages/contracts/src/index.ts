@@ -22,3 +22,5 @@ export const contracts = c.router(
 export const { users, documents, fields } = contracts
 
 export * from './users'
+export * from './documents'
+export * from './fields'
