@@ -5,6 +5,8 @@ import { FieldType } from './enums/field-type.enum'
 import { FieldContainerSchema } from './schemas/field-container.schema'
 import { FieldTextInputSchema } from './schemas/field-text-input.schema'
 import { Field, FieldSchema } from './schemas/field.schema'
+import { FieldsController } from './fields.controller';
+import { FieldsService } from './fields.service';
 
 @Module({
   imports: [
@@ -19,5 +21,7 @@ import { Field, FieldSchema } from './schemas/field.schema'
       },
     ]),
   ],
+  controllers: [FieldsController],
+  providers: [FieldsService],
 })
 export class FieldsModule {}
