@@ -1,6 +1,6 @@
 import type { LogLevel } from '@nestjs/common'
 import { ValidationPipe } from '@nestjs/common'
-import { NestFactory } from '@nestjs/core'
+import { HttpAdapterHost, NestFactory } from '@nestjs/core'
 import { SwaggerModule } from '@nestjs/swagger'
 import { generateOpenApi } from '@ts-rest/open-api'
 import helmet from 'helmet'
@@ -9,6 +9,7 @@ import { contracts } from '@azizonkg/contracts'
 import { envGeneric as env } from '@azizonkg/env'
 
 import { AppModule } from './app.module'
+import { MongoExceptionFilter } from './common/filters/mongo-exception.filter'
 
 async function bootstrap() {
   const isDev: boolean = env.NODE_ENV == 'development'
@@ -56,6 +57,9 @@ async function bootstrap() {
   }
 
   app.useGlobalPipes(new ValidationPipe())
+
+  const httpAdapterHost = app.get(HttpAdapterHost)
+  app.useGlobalFilters(new MongoExceptionFilter(httpAdapterHost))
 
   await app.listen(env.BACKEND_BIND_PORT, env.BACKEND_BIND_HOST)
   console.log(`Application is running on: ${await app.getUrl()}`)
