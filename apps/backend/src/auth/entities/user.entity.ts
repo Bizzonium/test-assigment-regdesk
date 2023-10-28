@@ -1,4 +1,6 @@
+import type * as mongoose from 'mongoose'
+
 export class User {
-  id!: string
+  id!: mongoose.Types.ObjectId
   username!: string
 }
