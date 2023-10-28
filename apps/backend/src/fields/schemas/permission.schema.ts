@@ -1,4 +1,4 @@
-import { User } from '@/src/users/schemas/user.schema'
+import type { UserDocument } from '@/src/users/schemas/user.schema'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import type { HydratedDocument } from 'mongoose'
 import * as mongoose from 'mongoose'
@@ -11,15 +11,13 @@ export class Permission {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
-    index: true,
   })
-  user!: User
+  user!: UserDocument | mongoose.Types.ObjectId
 
   @Prop({
     type: String,
     enum: Object.values(PermissionLevel),
     required: true,
-    index: true,
   })
   permission!: PermissionLevel
 }
@@ -27,3 +25,5 @@ export class Permission {
 export type PermissionDocument = HydratedDocument<Permission>
 
 export const PermissionSchema = SchemaFactory.createForClass(Permission)
+
+PermissionSchema.index({ user: 1, permission: 1 })

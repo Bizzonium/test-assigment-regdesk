@@ -1,9 +1,7 @@
-import type { Field } from '@/src/fields/schemas/field.schema'
+import type { FieldDocument } from '@/src/fields/schemas/field.schema'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import type { HydratedDocument } from 'mongoose'
 import * as mongoose from 'mongoose'
-
-export type DocumentDocument = HydratedDocument<Document>
 
 /**
  * A document is a set of different fields
@@ -13,8 +11,14 @@ export class Document {
   @Prop({ required: true })
   name!: string
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Field', index: true })
-  fields!: Field[]
+  @Prop({
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Field' }],
+    index: true,
+  })
+  fields!: mongoose.Types.DocumentArray<FieldDocument>
+  // fields!: FieldDocument[] | mongoose.Types.ObjectId[]
 }
+
+export type DocumentDocument = HydratedDocument<Document>
 
 export const DocumentSchema = SchemaFactory.createForClass(Document)

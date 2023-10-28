@@ -1,18 +1,18 @@
-// import { User } from '@/src/users/schemas/user.schema'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import type { HydratedDocument } from 'mongoose'
 
-import type { Document } from '../../documents/schemas/document.schema'
-import type { Field } from './field.schema'
+import type { DocumentDocument } from '../../documents/schemas/document.schema'
+import type { FieldType } from '../enums/field-type.enum'
+import type { FieldDocument } from './field.schema'
 
 @Schema()
 export class FieldTextInput {
   name!: string
-  type!: string
-  document!: Document
-  parent!: Field
+  type!: FieldType
+  document!: DocumentDocument
+  parent!: FieldDocument | undefined
 
-  @Prop({ default: null })
+  @Prop({ required: true })
   content!: string
 }
 

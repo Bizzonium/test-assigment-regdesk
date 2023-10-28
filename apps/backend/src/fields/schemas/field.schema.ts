@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import type { HydratedDocument } from 'mongoose'
 import * as mongoose from 'mongoose'
 
-import { Document } from '../../documents/schemas/document.schema'
+import { DocumentDocument } from '../../documents/schemas/document.schema'
 import { FieldType } from '../enums/field-type.enum'
 
 /**
@@ -23,20 +23,20 @@ export class Field {
 
   @Prop({
     type: String,
-    enum: [FieldType.CONTAINER, FieldType.TEXT],
+    enum: Object.values(FieldType),
     required: true,
   })
-  type!: string
+  type!: FieldType
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Document',
     index: true,
   })
-  document!: Document
+  document!: DocumentDocument
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Field', index: true })
-  parent!: Field
+  parent!: FieldDocument | undefined
 }
 
 export type FieldDocument = HydratedDocument<Field>

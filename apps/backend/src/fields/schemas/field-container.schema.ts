@@ -1,39 +1,44 @@
-// import { User } from '@/src/users/schemas/user.schema'
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import type { HydratedDocument } from 'mongoose'
 import * as mongoose from 'mongoose'
 
-import type { Document } from '../../documents/schemas/document.schema'
-import type { Field } from './field.schema'
-// import { PermissionLevel } from '../enums/permission-level.enum'
-import type { Permission } from './permission.schema'
+import type { DocumentDocument } from '../../documents/schemas/document.schema'
+import type { FieldType } from '../enums/field-type.enum'
+import type { FieldDocument } from './field.schema'
+import type { PermissionDocument } from './permission.schema'
 import { PermissionSchema } from './permission.schema'
 
 @Schema()
 export class FieldContainer {
   name!: string
-  type!: string
-  document!: Document
-  parent!: Field
-
-  // Note: we won't be able to create an effective index if we have dynamic key names :((
-  // @Prop({
-  //   type: Map,
-  //   of: { type: String, enum: Object.values(PermissionLevel) },
-  //   required: true,
-  // })
-  // permissions!: Map<mongoose.Schema.Types.ObjectId, PermissionLevel>
-
-  @Prop({ type: [PermissionSchema], required: true, index: true, sparse: true })
-  permissions!: Permission[]
+  type!: FieldType
+  document!: DocumentDocument
+  parent!: FieldDocument | undefined
 
   @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Field',
+    type: [PermissionSchema],
+    required: true,
+    default: [],
     index: true,
     sparse: true,
   })
-  fields!: Field[]
+  permissions!: mongoose.Types.DocumentArray<PermissionDocument>
+  // permissions!: PermissionDocument[]
+
+  @Prop({
+    type: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Field',
+      },
+    ],
+    required: true,
+    default: [],
+    index: true,
+    sparse: true,
+  })
+  fields!: mongoose.Types.DocumentArray<FieldDocument>
+  // fields!: FieldDocument[]
 }
 
 export type FieldContainerDocument = HydratedDocument<FieldContainer>
