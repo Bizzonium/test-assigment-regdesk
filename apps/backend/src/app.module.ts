@@ -18,6 +18,7 @@ import { UsersModule } from './users/users.module'
       // Should be disabled on production for performance reasons
       // see https://mongoosejs.com/docs/guide.html#indexes
       autoIndex: env.NODE_ENV !== 'production',
+      autoCreate: true,
     }),
     AuthModule,
     UsersModule,
