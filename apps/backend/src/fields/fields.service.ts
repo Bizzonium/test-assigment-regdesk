@@ -173,14 +173,16 @@ export class FieldsService {
     // Create field with user as owner
     const newField: FieldDocument = new this.fieldModel({
       ...createFieldDto,
-      ...(createFieldDto.type === FieldType.CONTAINER && {
-        permissions: [
-          {
-            user: user.id,
-            permission: PermissionLevel.EDIT,
-          },
-        ],
-      }),
+      ...(createFieldDto.type === FieldType.CONTAINER &&
+        createFieldDto.permissions && {
+          permissions: [
+            {
+              user: user.id,
+              permission: PermissionLevel.EDIT,
+            },
+            ...createFieldDto.permissions,
+          ],
+        }),
     })
 
     // Populate document and check if it exists
