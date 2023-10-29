@@ -15,7 +15,10 @@ import type {
   FieldContainer,
   FieldContainerDocument,
 } from './schemas/field-container.schema'
-import type { FieldTextInput } from './schemas/field-text-input.schema'
+import type {
+  FieldTextInput,
+  FieldTextInputDocument,
+} from './schemas/field-text-input.schema'
 import type { FieldDocument } from './schemas/field.schema'
 import { Field } from './schemas/field.schema'
 
@@ -31,52 +34,54 @@ export class FieldsService {
   async getFields(user: User): Promise<FieldDocument[]> {
     // Find fields that user has edit or view permission in container and field itself
     // or fields that don't have permissions (i.e. just text input)
-    const fields = await this.fieldModel.find<FieldDocument>({
-      $and: [
-        {
-          $or: [
-            {
-              permissions: {
-                $elemMatch: {
-                  $or: [
-                    {
-                      user: user.id,
-                      permission: PermissionLevel.EDIT,
-                    },
-                    {
-                      user: user.id,
-                      permission: PermissionLevel.VIEW,
-                    },
-                  ],
-                },
+    const fields = await this.fieldModel
+      .aggregate<FieldContainerDocument | FieldTextInputDocument>()
+      .match({
+        $or: [
+          { permissions: { $exists: false } },
+          {
+            permissions: {
+              $elemMatch: {
+                $or: [
+                  {
+                    user: user.id,
+                    permission: PermissionLevel.EDIT,
+                  },
+                  {
+                    user: user.id,
+                    permission: PermissionLevel.VIEW,
+                  },
+                ],
               },
             },
-            { permissions: { $exists: false } },
-          ],
-        },
-        {
-          $or: [
-            { parent: { $exists: false } },
-            {
-              'parent.permissions': {
-                $elemMatch: {
-                  $or: [
-                    {
-                      user: user.id,
-                      permission: PermissionLevel.EDIT,
-                    },
-                    {
-                      user: user.id,
-                      permission: PermissionLevel.VIEW,
-                    },
-                  ],
-                },
+          },
+        ],
+      })
+      .lookup({
+        from: 'fields',
+        localField: 'parent',
+        foreignField: '_id',
+        as: 'parent_doc',
+      })
+      .unwind({ path: '$parent_doc', preserveNullAndEmptyArrays: true })
+      .match({
+        $or: [
+          { parent_doc: { $exists: false } },
+          {
+            $or: [
+              {
+                'parent_doc.permissions.user': user.id,
+                'parent_doc.permissions.permission': PermissionLevel.EDIT,
               },
-            },
-          ],
-        },
-      ],
-    })
+              {
+                'parent_doc.permissions.user': user.id,
+                'parent_doc.permissions.permission': PermissionLevel.VIEW,
+              },
+            ],
+          },
+        ],
+      })
+      .project({ parent_doc: false })
 
     return fields
   }
@@ -87,8 +92,30 @@ export class FieldsService {
     const field = await this.fieldModel
       .findOne<FieldDocument>({
         _id: id,
-        $and: [
+        $or: [
           {
+            permissions: {
+              $elemMatch: {
+                $or: [
+                  {
+                    user: user.id,
+                    permission: PermissionLevel.EDIT,
+                  },
+                  {
+                    user: user.id,
+                    permission: PermissionLevel.VIEW,
+                  },
+                ],
+              },
+            },
+          },
+          { permissions: { $exists: false } },
+        ],
+      })
+      .populate([
+        {
+          path: 'fields',
+          match: {
             $or: [
               {
                 permissions: {
@@ -109,32 +136,9 @@ export class FieldsService {
               { permissions: { $exists: false } },
             ],
           },
-          {
-            $or: [
-              { parent: { $exists: false } },
-              {
-                'parent.permissions': {
-                  $elemMatch: {
-                    $or: [
-                      {
-                        user: user.id,
-                        permission: PermissionLevel.EDIT,
-                      },
-                      {
-                        user: user.id,
-                        permission: PermissionLevel.VIEW,
-                      },
-                    ],
-                  },
-                },
-              },
-            ],
-          },
-        ],
-      })
-      .populate([
+        },
         {
-          path: 'fields',
+          path: 'parent',
           match: {
             $or: [
               {
@@ -163,7 +167,99 @@ export class FieldsService {
       return null
     }
 
+    if (field.parent === null) {
+      throw new Error(
+        `Parent field not found or user does not have edit permission`
+      )
+    }
+
     return field
+
+    // Alternative implementation with aggregation
+
+    // const field = await this.fieldModel
+    //   .aggregate<FieldContainerDocument | FieldTextInputDocument>()
+    //   .match({
+    //     $expr: { $eq: ['$_id', { $toObjectId: id }] },
+    //     $or: [
+    //       { permissions: { $exists: false } },
+    //       {
+    //         permissions: {
+    //           $elemMatch: {
+    //             $or: [
+    //               {
+    //                 user: user.id,
+    //                 permission: PermissionLevel.EDIT,
+    //               },
+    //               {
+    //                 user: user.id,
+    //                 permission: PermissionLevel.VIEW,
+    //               },
+    //             ],
+    //           },
+    //         },
+    //       },
+    //     ],
+    //   })
+    //   .lookup({
+    //     from: 'fields',
+    //     localField: 'parent',
+    //     foreignField: '_id',
+    //     as: 'parent_doc',
+    //   })
+    //   .unwind({ path: '$parent_doc', preserveNullAndEmptyArrays: true })
+    //   .match({
+    //     $or: [
+    //       { parent_doc: { $exists: false } },
+    //       {
+    //         $or: [
+    //           {
+    //             'parent_doc.permissions.user': user.id,
+    //             'parent_doc.permissions.permission': PermissionLevel.EDIT,
+    //           },
+    //           {
+    //             'parent_doc.permissions.user': user.id,
+    //             'parent_doc.permissions.permission': PermissionLevel.VIEW,
+    //           },
+    //         ],
+    //       },
+    //     ],
+    //   })
+    //   .project({ parent_doc: false })
+    //   .lookup({
+    //     from: 'fields',
+    //     localField: 'fields',
+    //     foreignField: '_id',
+    //     pipeline: [
+    //       {
+    //         $match: {
+    //           $or: [
+    //             { permissions: { $exists: false } },
+    //             {
+    //               $or: [
+    //                 {
+    //                   'permissions.user': user.id,
+    //                   'permissions.permission': PermissionLevel.EDIT,
+    //                 },
+    //                 {
+    //                   'permissions.user': user.id,
+    //                   'permissions.permission': PermissionLevel.VIEW,
+    //                 },
+    //               ],
+    //             },
+    //           ],
+    //         },
+    //       },
+    //     ],
+    //     as: 'fields',
+    //   })
+    //   .limit(1)
+
+    // if (!field.length) {
+    //   return null
+    // }
+
+    // return field[0]
   }
 
   async addField(
@@ -231,7 +327,9 @@ export class FieldsService {
     updateFieldDto: UpdateFieldDto
   ): Promise<FieldDocument | null> {
     // Find field, check if user has edit permission to it and it's parent and update it
-    const field = await this.fieldModel.findOneAndUpdate<FieldDocument>(
+    const field = await this.fieldModel.findOneAndUpdate<
+      FieldContainerDocument | FieldTextInputDocument
+    >(
       {
         _id: id,
         permissions: {
