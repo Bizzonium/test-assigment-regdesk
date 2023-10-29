@@ -10,7 +10,7 @@ export class FieldTextInput {
   name!: string
   type!: FieldType
   document!: DocumentDocument
-  parent!: FieldDocument | undefined
+  parent?: FieldDocument
 
   @Prop({ required: true })
   content!: string

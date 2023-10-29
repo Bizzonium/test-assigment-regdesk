@@ -36,7 +36,7 @@ export class Field {
   document!: DocumentDocument
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Field', index: true })
-  parent!: FieldDocument | undefined
+  parent?: FieldDocument
 }
 
 export type FieldDocument = HydratedDocument<Field>
