@@ -2,7 +2,7 @@
 
 <details>
   <summary>Assigment Terms</summary>
-  
+
 ![image](https://github.com/Bizzonium/test-assigment-regdesk/assets/8555356/d0261100-03b2-47fa-a4a4-3730e839092b)
 
 </details>
@@ -11,6 +11,7 @@
 
 What could be improved or considered:
 
+- [ ] Use a Tree Structure model with Materialized Paths for Fields
 - [ ] Cascade removal for Documents/Fields/Users (mongoose middlewares? background job?)
 - [ ] Perform MongoDB operations in batches
 - [ ] Figure out proper recursive zod types in contracts for Fields and Documents
