@@ -11,10 +11,13 @@
 
 What could be improved or considered:
 
-- [ ] Use a Tree Structure model with Materialized Paths for Fields
-- [ ] Cascade removal for Documents/Fields/Users (mongoose middlewares? background job?)
+- [ ] Use a Tree Structure model with Materialized Paths
+  - **Fields** contains `path` field instead of `parent` reference
+  - Separate **Permissions** array from **Fields**. Each `path` in **Fields** is a container
+  - Check permission by finding array via **Field**'s `path` in **Permissions**
+- [ ] Cascade removal for **Documents**/**Fields**/**Users** (mongoose middlewares? background job?)
 - [ ] Perform MongoDB operations in batches
-- [ ] Figure out proper recursive zod types in contracts for Fields and Documents
+- [ ] Figure out proper recursive zod types in contracts for **Fields** and **Documents**
 - [ ] Virtual population when getting Document's fields, for example, and caching it with regeneration on changes?
 - [ ] Unit testing
 - [ ] E2E testing
