@@ -323,40 +323,24 @@ export class FieldsService {
     updateFieldDto: UpdateFieldDto
   ): Promise<FieldDocument | null> {
     // Find field, check if user has edit permission to it and it's parent and update it
-    const field = await this.fieldModel.findOneAndUpdate<
-      FieldContainerDocument | FieldTextInputDocument
-    >(
-      {
-        _id: id,
-        permissions: {
-          $elemMatch: {
-            user: user.id,
-            permission: PermissionLevel.EDIT,
-          },
-        },
-        $or: [
-          { parent: { $exists: false } },
-          {
-            'parent.permissions': {
-              $elemMatch: {
-                user: user.id,
-                permission: PermissionLevel.EDIT,
-              },
-            },
-          },
-        ],
-      },
+    const field = await this.getField(user, id, [PermissionLevel.EDIT])
+    if (!field) {
+      throw new Error(`Field not found or user does not have edit permission`)
+    }
+
+    const updatedField = await this.fieldModel.findByIdAndUpdate<FieldDocument>(
+      id,
       updateFieldDto,
       {
         setDefaultsOnInsert: true,
       }
     )
 
-    if (!field) {
+    if (!updatedField) {
       return null
     }
 
-    return field
+    return updatedField
   }
 
   async removeField(user: User, id: FieldId): Promise<FieldDocument | null> {
