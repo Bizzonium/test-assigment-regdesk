@@ -10,6 +10,7 @@ import type {
 
 import type { User } from '../auth/entities/user.entity'
 import { PermissionLevel } from '../fields/enums/permission-level.enum'
+import { FieldType } from './enums/field-type.enum'
 import type {
   FieldContainer,
   FieldContainerDocument,
@@ -172,12 +173,14 @@ export class FieldsService {
     // Create field with user as owner
     const newField: FieldDocument = new this.fieldModel({
       ...createFieldDto,
-      permissions: [
-        {
-          user: user.id,
-          permission: PermissionLevel.EDIT,
-        },
-      ],
+      ...(createFieldDto.type === FieldType.CONTAINER && {
+        permissions: [
+          {
+            user: user.id,
+            permission: PermissionLevel.EDIT,
+          },
+        ],
+      }),
     })
 
     // Populate document and check if it exists
