@@ -9,6 +9,7 @@ import { contracts } from '@azizonkg/contracts'
 import { envGeneric as env } from '@azizonkg/env'
 
 import { AppModule } from './app.module'
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter'
 import { MongoExceptionFilter } from './common/filters/mongo-exception.filter'
 
 async function bootstrap() {
@@ -60,6 +61,7 @@ async function bootstrap() {
 
   const httpAdapterHost = app.get(HttpAdapterHost)
   app.useGlobalFilters(new MongoExceptionFilter(httpAdapterHost))
+  app.useGlobalFilters(new AllExceptionsFilter(httpAdapterHost))
 
   await app.listen(env.BACKEND_BIND_PORT, env.BACKEND_BIND_HOST)
   console.log(`Application is running on: ${await app.getUrl()}`)
