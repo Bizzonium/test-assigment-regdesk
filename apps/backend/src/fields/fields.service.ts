@@ -345,39 +345,29 @@ export class FieldsService {
 
   async removeField(user: User, id: FieldId): Promise<FieldDocument | null> {
     // Find field, check if user has edit permission to it and it's parent and remove it
-    const field = await this.fieldModel.findOneAndDelete<FieldDocument>({
-      _id: id,
-      permissions: {
-        $elemMatch: {
-          user: user.id,
-          permission: PermissionLevel.EDIT,
-        },
-      },
-      $or: [
-        { parent: { $exists: false } },
-        {
-          'parent.permissions': {
-            $elemMatch: {
-              user: user.id,
-              permission: PermissionLevel.EDIT,
-            },
-          },
-        },
-      ],
-    })
-
+    const field = await this.getField(user, id, [PermissionLevel.EDIT])
     if (!field) {
+      throw new Error(`Field not found or user does not have edit permission`)
+    }
+
+    const deletedField = await this.fieldModel.findByIdAndDelete<FieldDocument>(
+      {
+        _id: id,
+      }
+    )
+
+    if (!deletedField) {
       return null
     }
 
     // Remove field from parent document
-    if (field.parent) {
+    if (deletedField.parent) {
       const parentContainerField =
         await this.fieldModel.findByIdAndUpdate<FieldContainerDocument>(
-          field.parent,
+          deletedField.parent,
           {
             $pull: {
-              fields: field._id,
+              fields: deletedField._id,
             },
           }
         )
@@ -387,13 +377,13 @@ export class FieldsService {
     }
 
     // Remove field from document
-    await field.populate('document')
-    if (!field.document) {
+    await deletedField.populate('document')
+    if (!deletedField.document) {
       throw new Error(`Document not found`)
     }
-    field.document.fields.filter((f) => !f._id.equals(field._id))
-    await field.document.save()
+    deletedField.document.fields.filter((f) => !f._id.equals(deletedField._id))
+    await deletedField.document.save()
 
-    return field
+    return deletedField
   }
 }
