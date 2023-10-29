@@ -13,7 +13,7 @@ export class FieldContainer {
   name!: string
   type!: FieldType
   document!: DocumentDocument
-  parent?: FieldDocument
+  parent!: FieldDocument | undefined
 
   @Prop({
     type: [PermissionSchema],
