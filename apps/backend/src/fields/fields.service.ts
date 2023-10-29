@@ -86,7 +86,11 @@ export class FieldsService {
     return fields
   }
 
-  async getField(user: User, id: FieldId): Promise<FieldDocument | null> {
+  async getField(
+    user: User,
+    id: FieldId,
+    perms: PermissionLevel[] = [PermissionLevel.EDIT, PermissionLevel.VIEW]
+  ): Promise<FieldDocument | null> {
     // Find field that user has edit or view permission in container and field itself
     // or field that doesn't have permissions (i.e. just text input)
     const field = await this.fieldModel
@@ -97,14 +101,10 @@ export class FieldsService {
             permissions: {
               $elemMatch: {
                 $or: [
-                  {
+                  perms.map((perm) => ({
                     user: user.id,
-                    permission: PermissionLevel.EDIT,
-                  },
-                  {
-                    user: user.id,
-                    permission: PermissionLevel.VIEW,
-                  },
+                    permission: perm,
+                  })),
                 ],
               },
             },
@@ -145,14 +145,10 @@ export class FieldsService {
                 permissions: {
                   $elemMatch: {
                     $or: [
-                      {
+                      perms.map((perm) => ({
                         user: user.id,
-                        permission: PermissionLevel.EDIT,
-                      },
-                      {
-                        user: user.id,
-                        permission: PermissionLevel.VIEW,
-                      },
+                        permission: perm,
+                      })),
                     ],
                   },
                 },
